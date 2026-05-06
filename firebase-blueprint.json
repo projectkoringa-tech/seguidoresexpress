@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "App user profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "balance": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "balance", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A follower purchase order",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "service": { "type": "string", "enum": ["tiktok", "instagram"] },
+        "targetAccount": { "type": "string" },
+        "quantity": { "type": "number" },
+        "cost": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "completed", "failed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "service", "targetAccount", "quantity", "cost", "status", "createdAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction (deposit or withdrawal)",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["deposit", "order_payment", "deposit_direct"] },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "type", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "User profiles and balances"
+    },
+    "orders": {
+      "schema": "Order",
+      "description": "Follower purchase orders"
+    },
+    "transactions": {
+      "schema": "Transaction",
+      "description": "History of funds added and spent"
+    }
+  }
+}
