@@ -12,7 +12,7 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
 
-  const presets = [1, 100, 300, 500, 1000];
+  const presets = [100, 300, 500];
 
   const handleDeposit = async () => {
     if (!showWarning) {
@@ -29,17 +29,15 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
     
     // Payment link mapping
     const links: Record<number, string> = {
-      1: 'https://kiki.oluali.com/y9eya64e',
       100: 'https://pay.kumbipay.com/aca90fe1-2e66-4ab0-8b8b-ff35130c9509',
       300: 'https://pay.kumbipay.com/57780fcd-9ce0-4235-beb5-1e9ee1c02595',
-      500: 'https://pay.kumbipay.com/e771b0db-f4c7-4560-a7d7-87a955a12d1e',
-      1000: 'https://kiki.oluali.com/9c70g56n'
+      500: 'https://pay.kumbipay.com/e771b0db-f4c7-4560-a7d7-87a955a12d1e'
     };
 
     const targetLink = links[amount];
 
     if (!targetLink) {
-      setError(`Selecione um valor válido (1, 100, 300, 500 ou 1000 Kz)`);
+      setError(`Selecione um valor válido (100, 300 ou 500 Kz)`);
       setLoading(false);
       return;
     }
@@ -68,7 +66,7 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
       <div className="bento-card p-10 space-y-10">
         <div className="space-y-4">
           <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Selecione o valor desejado</label>
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {presets.map(v => (
               <button
                 key={v}
