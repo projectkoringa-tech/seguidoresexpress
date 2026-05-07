@@ -12,12 +12,19 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Profile } from './pages/Profile';
 import { SuccessDeposit } from './pages/SuccessDeposit';
+import { Admin } from './pages/Admin';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = user && [
+    'projectkoringa@gmail.com',
+    'ivopacavira6@gmail.com',
+    'ivoimbi5@gmail.com'
+  ].includes(user.email || '');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -45,8 +52,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
+      <div className="h-screen w-full flex items-center justify-center bg-slate-950">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-100" />
       </div>
     );
   }
@@ -57,12 +64,13 @@ export default function App() {
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
         
-        <Route element={user ? <Layout user={user} profile={profile} /> : <Navigate to="/login" />}>
+        <Route element={user ? <Layout user={user} profile={profile} isAdmin={!!isAdmin} /> : <Navigate to="/login" />}>
           <Route path="/" element={<Dashboard user={user} profile={profile} />} />
           <Route path="/orders" element={<Orders user={user} />} />
           <Route path="/add-funds" element={<AddFunds user={user} profile={profile} />} />
           <Route path="/profile" element={<Profile user={user} profile={profile} />} />
           <Route path="/sucesscarse" element={<SuccessDeposit user={user} />} />
+          {isAdmin && <Route path="/admin" element={<Admin />} />}
         </Route>
       </Routes>
     </Router>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../lib/firebase';
 import { doc, updateDoc, increment, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { UserProfile } from '../types';
-import { Wallet, CreditCard, Smartphone, CheckCircle2, QrCode } from 'lucide-react';
+import { Wallet, CreditCard, Smartphone, CheckCircle2, QrCode, AlertCircle, X } from 'lucide-react';
 import { formatCurrency, cn } from '../lib/utils';
 import { motion } from 'motion/react';
 
@@ -10,11 +10,18 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
   const [amount, setAmount] = useState(300);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
-  const presets = [1, 300, 500, 1000];
+  const presets = [1, 100, 300, 500, 1000];
 
   const handleDeposit = async () => {
+    if (!showWarning) {
+      setShowWarning(true);
+      return;
+    }
+
     setLoading(true);
+    setShowWarning(false);
     setError(null);
     
     // Store for secret success page retrieval
@@ -23,15 +30,16 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
     // Payment link mapping
     const links: Record<number, string> = {
       1: 'https://kiki.oluali.com/y9eya64e',
-      300: 'https://kiki.oluali.com/gf59gvd0',
-      500: 'https://kiki.oluali.com/vzdtuc6w',
+      100: 'https://pay.kumbipay.com/aca90fe1-2e66-4ab0-8b8b-ff35130c9509',
+      300: 'https://pay.kumbipay.com/57780fcd-9ce0-4235-beb5-1e9ee1c02595',
+      500: 'https://pay.kumbipay.com/e771b0db-f4c7-4560-a7d7-87a955a12d1e',
       1000: 'https://kiki.oluali.com/9c70g56n'
     };
 
     const targetLink = links[amount];
 
     if (!targetLink) {
-      setError(`Selecione um valor válido (1, 300, 500 ou 1000 Kz)`);
+      setError(`Selecione um valor válido (1, 100, 300, 500 ou 1000 Kz)`);
       setLoading(false);
       return;
     }
@@ -60,7 +68,7 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
       <div className="bento-card p-10 space-y-10">
         <div className="space-y-4">
           <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Selecione o valor desejado</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {presets.map(v => (
               <button
                 key={v}
@@ -105,6 +113,51 @@ export const AddFunds: React.FC<{ user: any, profile: UserProfile | null }> = ({
           {loading ? 'Redirecionando...' : `Confirmar Pagamento de ${formatCurrency(amount)}`}
         </button>
       </div>
+
+      {/* Warning Modal */}
+      {showWarning && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-md bento-card p-8 relative space-y-6"
+          >
+            <button 
+              onClick={() => setShowWarning(false)}
+              className="absolute right-6 top-6 text-slate-500 hover:text-slate-300"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+
+            <div className="text-center space-y-4">
+              <h3 className="text-xl font-black text-slate-100 italic">Aviso Importante</h3>
+              <p className="text-slate-400 font-medium leading-relaxed">
+                <span className="text-amber-500 font-bold block mb-2">Nota:</span>
+                Quando realizar o pagamento, se receber uma notificação para sair, clica em <span className="text-slate-100 font-bold">"Sair"</span> para que o pagamento seja concluído com sucesso.
+              </p>
+            </div>
+
+            <div className="grid gap-3 pt-4">
+              <button
+                onClick={handleDeposit}
+                className="w-full bg-slate-100 text-slate-950 font-black py-4 rounded-2xl hover:bg-white transition-all active:scale-95"
+              >
+                Entendi e Avançar
+              </button>
+              <button
+                onClick={() => setShowWarning(false)}
+                className="w-full bg-slate-900 text-slate-400 font-bold py-4 rounded-2xl hover:bg-slate-800 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

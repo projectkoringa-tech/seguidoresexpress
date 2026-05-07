@@ -13,22 +13,26 @@ export const SuccessDeposit: React.FC<{ user: any }> = ({ user }) => {
   const [error, setError] = useState<string | null>(null);
   
   const [amount, setAmount] = useState<number>(0);
+  const processedRef = React.useRef(false);
 
   useEffect(() => {
+    if (!user || processedRef.current) return;
+
     const storedAmount = localStorage.getItem('val_carregamento');
     const queryAmount = Number(searchParams.get('v'));
     
     const finalAmount = queryAmount || (storedAmount ? Number(storedAmount) : 0);
+    
+    if (finalAmount <= 0) {
+      setError('Valor inválido para carregamento.');
+      setProcessing(false);
+      return;
+    }
+
     setAmount(finalAmount);
+    processedRef.current = true;
 
     const processDirectDeposit = async () => {
-      if (!user) return;
-      if (finalAmount <= 0) {
-        setError('Valor inválido para carregamento.');
-        setProcessing(false);
-        return;
-      }
-
       try {
         // Update user balance
         const userRef = doc(db, 'users', user.uid);
@@ -60,7 +64,7 @@ export const SuccessDeposit: React.FC<{ user: any }> = ({ user }) => {
     };
 
     processDirectDeposit();
-  }, [user, amount, navigate]);
+  }, [user, navigate, searchParams]);
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">

@@ -1,30 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // 0. Global Safety Net
     match /{document=**} {
       allow read, write: if false;
     }
 
+    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'projectkoringa@gmail.com' ||
+        request.auth.token.email == 'ivopacavira6@gmail.com' ||
+        request.auth.token.email == 'ivoimbi5@gmail.com'
+      );
+    }
 
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Helper to check if a string is a valid ID
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // 1. Users Collection
     match /users/{userId} {
-      allow get: if isSignedIn() && request.auth.uid == userId;
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && request.auth.uid == userId;
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) 
+        && request.resource.data.uid == userId
+        && request.resource.data.balance == 0;
+      allow update: if (isOwner(userId) && request.resource.data.uid == userId) || isAdmin();
     }
 
+    // 2. Orders Collection
     match /orders/{orderId} {
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow list, get: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
 
+    // 3. Transactions Collection
     match /transactions/{transactionId} {
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow list, get: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
   }
 }

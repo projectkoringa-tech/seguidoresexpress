@@ -3,16 +3,17 @@ import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
-import { LayoutDashboard, ShoppingCart, Wallet, User as UserIcon, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Wallet, User as UserIcon, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
 import { cn, formatCurrency } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface LayoutProps {
   user: User;
   profile: UserProfile | null;
+  isAdmin?: boolean;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ user, profile }) => {
+export const Layout: React.FC<LayoutProps> = ({ user, profile, isAdmin }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -23,6 +24,10 @@ export const Layout: React.FC<LayoutProps> = ({ user, profile }) => {
     { label: 'Carregar Conta', icon: Wallet, path: '/add-funds' },
     { label: 'Perfil', icon: UserIcon, path: '/profile' },
   ];
+
+  if (isAdmin) {
+    navItems.push({ label: 'Admin', icon: ShieldCheck, path: '/admin' });
+  }
 
   const handleLogout = async () => {
     await auth.signOut();
